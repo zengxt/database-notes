@@ -37,3 +37,30 @@ select * from emp where job = 'MANAGER' or job = 'CLERK';
 -- LIKE 用于字符型数据的查询，可以执行模糊查询
 -- % 表示0个或多个任意的字符
 select * from emp where ename like '%A%';
+select * from emp where ename like 'A%';
+-- _表示一个字符
+select * from emp where ename like '_A%';
+-- 需要匹配 % 时需要转义，并且可以指定转义符
+select * from emp where ename like '%\%%' ESCAPE '\';
+
+
+-- 对于空值，要使用 IS NULL进行比较
+select * from emp where comm is null;
+
+
+-- 使用 NOT 运算符
+select * from emp where sal not between 2000 and 3000;
+-- 等价于
+select * from emp where sal < 2000 or sal > 3000;
+
+select * from emp where comm is not null;
+
+
+-- 使用 Order By 对查询结果进行排序 (asc关键字可有可无，默认就是ASC 升序排列)
+select * from emp order by sal asc;
+-- 降序排列
+select * from emp order by sal desc;
+-- 使用字段的别名进行排序
+select empno, ename, (sal * 12) "年薪"
+from emp
+order by "年薪";
