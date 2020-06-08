@@ -10,7 +10,7 @@
 
 
 
-## PL/SQL的程序结构
+## 一、PL/SQL的程序结构
 
 ```plsql
 DECLARE
@@ -23,7 +23,7 @@ END;
 /
 ```
 
-### 说明部分
+### 1、说明部分
 
 &emsp;&emsp;1、定义基本变量
 
@@ -74,9 +74,9 @@ END;
 
 
 
-### 语句序列
+### 2、语句序列
 
-#### 1、IF语句
+#### 1）、IF语句
 
 ```plsql
 IF 条件 THEN 语句序列1;
@@ -117,7 +117,7 @@ END;
 
 
 
-#### 2、WHILE循环
+#### 2）、WHILE循环
 
 ```plsql
 WHILE total <= 25000 LOOP
@@ -142,7 +142,7 @@ END;
 
 
 
-#### 3、LOOP循环
+#### 3）、LOOP循环
 
 ```plsql
 LOOP
@@ -170,7 +170,7 @@ END;
 
 
 
-#### 4、FOR循环
+#### 4）、FOR循环
 
 ```plsql
 FOR I IN 1 .. 3 LOOP
@@ -192,7 +192,7 @@ END;
 
 
 
-#### 5、游标
+#### 5）、游标
 
 &emsp;&emsp;可以理解为Java程序中的结果集（Result Set）；
 
@@ -256,6 +256,8 @@ END;
 
 &emsp;&emsp;4、%ROWCOUNT：影响的行数（注意rowcount是影响的行数，不是总共行数，例如游标中共有100条数据，取走了10条，那么%ROWCOUNT就是10）。
 
+
+
 **游标数目的限制**
 
 &emsp;&emsp;默认情况下，oracle数据库只允许在同一个会话中，打开300个游标
@@ -269,6 +271,8 @@ alter system set open_cursors = 400 scope = both;
 ```
 
 &emsp;&emsp;scope的取值，both、memory（只更改当前实例，不更改配置文件）；spfile（只更改配置文件，不更改当前实例，数据库需要重启才起作用）。
+
+
 
 **游标使用的实例**
 
@@ -329,11 +333,118 @@ END;
 
 
 
-### 例外（异常）处理语句
+### 3、例外（异常）处理语句
+
+&emsp;&emsp;Oracle中的例外分为：系统例外、自定义例外
+
+#### 1）、系统例外（异常）
+
+&emsp;&emsp;常用系统例外：1、NO_DATA_FOUND（没有找到数据）；2、TOO_MANY_ROWS（SELECT...INTO语句匹配多个行）；3、ZERO_DIVIDE（被零除）；4、VALUE_ERROR（算术或转换错误）；5、TIME_ON_RESOURCE（在等待资源时发生超时）。
+
+**NO_DATA_FOUND**
+
+```plsql
+DECLARE
+  pname emp.ename%type;
+BEGIN
+  SELECT ename INTO pname FROM emp WHERE empno=1234;
+  
+  -- 一般需要在 PLSQL 程序中处理所有的异常，否则会将异常抛给数据库
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN dbms_output.put_line('没有找到该员工');
+    -- 处理所有上述已经处理的异常，OTHERS 将处理其他所有异常
+    WHEN OTHERS THEN dbms_output.put_line('其他异常！');
+END;
+```
+
+**TOO_MANY_ROWS**
+
+```plsql
+DECLARE
+  pname emp.ename%type;
+BEGIN
+  SELECT ename INTO pname FROM emp WHERE deptno = 10;
+  
+  EXCEPTION
+    WHEN TOO_MANY_ROWS THEN dbms_output.put_line('SELECT INTO匹配了多行');
+    WHEN OTHERS THEN dbms_output.put_line('其他异常！');
+END;
+```
+
+**ZERO_DIVIDE**
+
+```plsql
+DECLARE
+  pnum number;
+BEGIN
+  pnum := 10 / 0;
+  
+  EXCEPTION
+    -- THEN 相当于一个括号，后面可以跟多个异常处理语句
+    WHEN ZERO_DIVIDE THEN 
+      dbms_output.put_line('0不能做除数');
+      dbms_output.put_line('0不能被除');
+    WHEN OTHERS THEN dbms_output.put_line('其他异常！');
+END;
+```
+
+**VALUE_ERROR**
+
+```plsql
+DECLARE
+  pnum number;
+BEGIN
+  pnum := 'abc';
+  
+  EXCEPTION
+    WHEN VALUE_ERROR THEN dbms_output.put_line('算术或者转换错误！');
+    WHEN OTHERS THEN dbms_output.put_line('其他异常！');
+END;
+```
+
+
+
+#### 2）、自定义例外（异常）
+
+&emsp;&emsp;定义变量，类型是exception，使用raise抛出自定义例外。
+
+```plsql
+DECLARE
+  -- 定义关标
+  CURSOR cemp IS SELECT ename FROM emp WHERE deptno = 50;
+  pname emp.ename%type;
+  
+  -- 自定义异常
+  NO_EMP_FOUND EXCEPTION;
+BEGIN
+  OPEN cemp;
+  
+  FETCH cemp INTO pname;
+  IF cemp%NOTFOUND THEN
+    -- 抛出异常
+    RAISE NO_EMP_FOUND;
+  END IF;
+  
+  -- 按道理 RAISE 抛出异常后，后面的语句将不再执行
+  -- 但是Oracle数据库会自动启动 pmon（process monitor进程监视器），在程序异常时自动进行垃圾和资源回收
+  CLOSE cemp;
+  
+  EXCEPTION
+    WHEN NO_EMP_FOUND THEN dbms_output.put_line('没有找到员工！');
+    WHEN OTHERS THEN dbms_output.put_line('其他异常！');
+END;
+```
+
+
+
+## 二、PL/SQL程序示例
+
+&emsp;&emsp;程序设计瀑布模型：需求分析 --> 设计（概要设计、详细设计） --> 编码（coding） --> 测试（Testing） --> 上线。
+
+### 1、统计每年入职的员工人数
 
 
 
 
 
-
-
+2、
