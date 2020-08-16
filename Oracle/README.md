@@ -26,7 +26,7 @@
 
 &emsp;&emsp;数据字典的命名规则：
 
-![image-20200614173723565](/picture/image-20200614173723565.png)
+![image-20200614173723565](../Oracle/picture/image-20200614173723565.png)
 
 **1，内部RDBMS（X$）表**
 
