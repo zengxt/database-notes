@@ -26,7 +26,7 @@
 
 &emsp;&emsp;数据字典的命名规则：
 
-![image-20200614173723565](D:\DataBase Program\Oracle\picture\image-20200614173723565.png)
+![image-20200614173723565](../Oracle/picture/image-20200614173723565.png)
 
 **1，内部RDBMS（X$）表**
 
@@ -69,11 +69,11 @@ _&emsp;&emsp;● ALL_：用于有权限访问的所有对象的信息；
 
 &emsp;&emsp;show user可以查看当前登录用户
 
-![image-20200614143038128](D:\DataBase Program\Oracle\picture\image-20200614143038128.png)
+![image-20200614143038128](../Oracle/picture/image-20200614143038128.png)
 
 &emsp;&emsp;dba_users和user_users数据字典中存储了有关用户的信息。
 
-![image-20200614143636786](D:\DataBase Program\Oracle\picture\image-20200614143636786.png)
+![image-20200614143636786](../Oracle/picture/image-20200614143636786.png)
 
 &emsp;&emsp;在SQLPlus中，SQLPlus命令并不要求以分号结尾，例如show user，desc等，但是sql 语句必须以分号结尾。
 
@@ -101,7 +101,7 @@ _&emsp;&emsp;● ALL_：用于有权限访问的所有对象的信息；
 
 &emsp;&emsp;查看用户的表空间：dba_tablespaces和user_tablespaces数据字典中分别保存了系统和用户的表空间信息。
 
-![image-20200614165800497](D:\DataBase Program\Oracle\picture\image-20200614165800497.png)
+![image-20200614165800497](../Oracle/picture/image-20200614165800497.png)
 
 &emsp;&emsp;查看用户的默认表空间和临时表空间：
 
@@ -109,7 +109,7 @@ _&emsp;&emsp;● ALL_：用于有权限访问的所有对象的信息；
 SELECT DEFAULT_TABLESPACE, TEMPORARY_TABLESPACE FROM DBA_USERS WHERE USERNAME='SYSTEM';
 ```
 
-![image-20200614170508020](D:\DataBase Program\Oracle\picture\image-20200614170508020.png)
+![image-20200614170508020](../Oracle/picture/image-20200614170508020.png)
 
 &emsp;&emsp;修改用户的默认和临时表空间：
 
@@ -129,7 +129,7 @@ CREATE [TEMPORARY] TABLESPACE tablespace_name TEMPFILE|DATAFILE 'xx.dbf' SIZE xx
 
 &emsp;&emsp;dba_data_files数据字典中保存了表空间相关文件的信息：
 
-![image-20200614172722134](D:\DataBase Program\Oracle\picture\image-20200614172722134.png)
+![image-20200614172722134](../Oracle/picture/image-20200614172722134.png)
 
 <br/>
 
@@ -240,7 +240,7 @@ DROP TABLESPACE tablespace_name [INCLUDING CONTENTS]
 
 &emsp;&emsp;Oracle的不同数据类型之间的转换，从字符型转换成日期型需要固定的字符格式才能转成功。
 
-![image-20200614215917281](D:\DataBase Program\Oracle\picture\image-20200614215917281.png)
+![image-20200614215917281](../Oracle/picture/image-20200614215917281.png)
 
 <br/>
 
@@ -467,11 +467,102 @@ SELECT constraint_name FROM user_constraints;
 
 修改表时添加主键约束
 
+```sql
+ALTER TABLE table_name ADD CONSTRAINT constraint_name PRIMARY KEY(column_nam1, ...)
+```
+
+```sql
+ALTER TABLE userinfo ADD CONSTRAINT user_primary_key_id PRIMARY KEY(user_id);
+
+-- 查询约束信息
+SELECT * FROM user_constraints;
+```
+
+重命名约束
+
+```sql
+ALTER TABLE table_name RENAME CONSTRAINT constraint_name TO new_constraint_name;
+
+ALTER TABLE userinfo RENAME CONSTRAINT user_primary_key_id TO user_pk_id;
+```
+
+删除约束
+
+```sql
+-- 禁用或启用约束
+ALTER TABLE table_name DISABLE | ENABLE CONSTRAINT constraint_name;
+
+-- 删除约束
+ALTER TABLE table_name DROP CONSTRAINT constraint_name;
+
+-- 由于一个表只有一个主键，所以可以直接删除主键， CASCADE表示级联删除
+ALTER TABLE table_name DROP PRIMARY KEY [CASCADE]
+```
+
+
+
 <br/>
 
 #### 5.3.3、外键约束
 
+在创建表的时候创建外键约束
 
+```sql
+-- table1称为从表，table2称为主表
+-- 引用主表中的字段必须是主表的主键字段，主从表中相应的字段必须是同一个数据类型
+CREATE TABLE table1
+	(column_name datatype REFERENCES table2(column_name),
+     ...
+);
+
+-- ON DELETE CASCADE：主表中相应字段删除后，从表相应的行也会删除
+CONSTRAINT constraint_name FOREIGN KEY(column_name) REFERENCES table_name(column_name) [ON DELETE CASCADE]
+
+CREATE TABLE userinfo_f2(
+	id varchar2(10) PRIMARY KEY,
+    username varchar2(20),
+    user_typeid varchar2(10),
+    CONSTRAINT fk_user_typeid FOREIGN KEY(user_typeid) REFERENCES typeinfo(typeId)
+);
+```
+
+```sql
+CREATE TABLE typeinfo(
+   typeId varchar2(10) primary key,
+   typeName varchar2(20)
+);
+
+CREATE TABLE userInfo_f(
+   id varchar2(10) primary key,
+   username varchar2(20),
+   user_typeId varchar2(10) references typeinfo(typeId)
+);
+
+INSERT INTO typeinfo VALUES(1, 3);
+-- 外键约束列要么是主表中的值，要么是null值
+INSERT INTO userInfo_f(id, username, user_typeId) VALUES(1, 'test1', 1);
+INSERT INTO userInfo_f(id, username, user_typeId) VALUES(2, 'test2', null);
+
+-- ORA-02291: 违反完整约束条件 (SCOTT.SYS_C0011805) - 未找到父项关键字
+INSERT INTO userInfo_f(id, username, user_typeId) VALUES(3, 'test3', 3);
+```
+
+在修改表的时候设置外键约束
+
+```sql
+ALTER TABLE table_name ADD CONSTRAINT constraint_name
+FOREIGN KEY(column_name) REFERENCES table_name(column_name) [ON DELETE CASCADE]
+```
+
+删除外键约束
+
+```sql
+-- 禁用或启用约束
+ALTER TABLE table_name DISABLE | ENABLE CONSTRAINT constraint_name;
+
+-- 删除约束
+ALTER TABLE table_name DROP CONSTRAINT constraint_name;
+```
 
 <br/>
 
