@@ -6,16 +6,19 @@
 
 &emsp;&emsp;3、Oracle数据库的特点：
 
-- &emsp;&emsp;支持大数据库，多用户的高性能的事务处理；
-- &emsp;&emsp;Oracle遵守数据存取语言、操作系统、用户接口和网络通信协议的工业标准（SQL）；
-- &emsp;&emsp;实施安全性控制和完整性控制；
-- &emsp;&emsp;支持分布式数据库和分布处理；
-- &emsp;&emsp;具有可移植性、可兼容性和可连续性；
-- &emsp;&emsp;全球化、跨平台的数据库。
+&emsp;&emsp;&emsp;&emsp;支持大数据库，多用户的高性能的事务处理；
 
+&emsp;&emsp;&emsp;&emsp;Oracle遵守数据存取语言、操作系统、用户接口和网络通信协议的工业标准（SQL）；
 
+&emsp;&emsp;&emsp;&emsp;实施安全性控制和完整性控制；
 
+&emsp;&emsp;&emsp;&emsp;支持分布式数据库和分布处理；
 
+&emsp;&emsp;&emsp;&emsp;具有可移植性、可兼容性和可连续性；
+
+&emsp;&emsp;&emsp;&emsp;全球化、跨平台的数据库。
+
+<br/>
 
 ## 一、Oracle的数据字典
 
@@ -23,7 +26,7 @@
 
 &emsp;&emsp;数据字典的命名规则：
 
-![image-20200614173723565](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200614173723565.png)
+![image-20200614173723565](D:\DataBase Program\Oracle\picture\image-20200614173723565.png)
 
 **1，内部RDBMS（X$）表**
 
@@ -51,7 +54,7 @@ _&emsp;&emsp;● ALL_：用于有权限访问的所有对象的信息；
 
 &emsp;&emsp;动态性能视图记录了数据库运行时信息和统计数据，大部分动态性能视图被实时更新以及反映数据库当前状态。在数据库启动时，Oracle动态创建X$表，在此基础上，Oracle创建了GV$和V$视图，GV$即Global V$，除了一些特例外，每个V$都对应一个GV$。GV$产生是为了OPS/RAC环境的需要，每个V$都是基于GV$的，只是GV$多了INST_ID列来显示实例ID。
 
-
+<br/>
 
 
 ## 二、Oracle开发基础
@@ -60,17 +63,17 @@ _&emsp;&emsp;● ALL_：用于有权限访问的所有对象的信息；
 
 &emsp;&emsp;启用或者锁定某个用户：alter user username account unlock/lock;
 
-&emsp;&emsp;2、登录数据库：\[username\]\[password\]\[@server\]\[as sysdba|sysoper\];
+&emsp;&emsp;2、登录数据库：\[username\]/\[password\]\[@server\]\[as sysdba|sysoper\];
 
 &emsp;&emsp;例如：system/root@orcl as sysdba;  【其中orcl就是自己设置的服务名】。
 
 &emsp;&emsp;show user可以查看当前登录用户
 
-![image-20200614143038128](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200614143038128.png)
+![image-20200614143038128](D:\DataBase Program\Oracle\picture\image-20200614143038128.png)
 
 &emsp;&emsp;dba_users和user_users数据字典中存储了有关用户的信息。
 
-![image-20200614143636786](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200614143636786.png)
+![image-20200614143636786](D:\DataBase Program\Oracle\picture\image-20200614143636786.png)
 
 &emsp;&emsp;在SQLPlus中，SQLPlus命令并不要求以分号结尾，例如show user，desc等，但是sql 语句必须以分号结尾。
 
@@ -82,7 +85,7 @@ _&emsp;&emsp;● ALL_：用于有权限访问的所有对象的信息；
 
 
 
-
+<br/>
 
 ## 三、Oracle的表空间
 
@@ -96,9 +99,9 @@ _&emsp;&emsp;● ALL_：用于有权限访问的所有对象的信息；
 
 
 
-&emsp;&emsp;查看用户的表空间：dba_tablespaces和user_tablespacess数据字典中分别保存了系统和用户的表空间信息。
+&emsp;&emsp;查看用户的表空间：dba_tablespaces和user_tablespaces数据字典中分别保存了系统和用户的表空间信息。
 
-![image-20200614165800497](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200614165800497.png)
+![image-20200614165800497](D:\DataBase Program\Oracle\picture\image-20200614165800497.png)
 
 &emsp;&emsp;查看用户的默认表空间和临时表空间：
 
@@ -106,7 +109,7 @@ _&emsp;&emsp;● ALL_：用于有权限访问的所有对象的信息；
 SELECT DEFAULT_TABLESPACE, TEMPORARY_TABLESPACE FROM DBA_USERS WHERE USERNAME='SYSTEM';
 ```
 
-![image-20200614170508020](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200614170508020.png)
+![image-20200614170508020](D:\DataBase Program\Oracle\picture\image-20200614170508020.png)
 
 &emsp;&emsp;修改用户的默认和临时表空间：
 
@@ -114,7 +117,7 @@ SELECT DEFAULT_TABLESPACE, TEMPORARY_TABLESPACE FROM DBA_USERS WHERE USERNAME='S
 ALTER USER user_name DEFAULT|TEMPORARY TABLESPACE tablespace_name;
 ```
 
-
+<br/>
 
 **创建表空间：**
 
@@ -126,9 +129,9 @@ CREATE [TEMPORARY] TABLESPACE tablespace_name TEMPFILE|DATAFILE 'xx.dbf' SIZE xx
 
 &emsp;&emsp;dba_data_files数据字典中保存了表空间相关文件的信息：
 
-![image-20200614172722134](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200614172722134.png)
+![image-20200614172722134](D:\DataBase Program\Oracle\picture\image-20200614172722134.png)
 
-
+<br/>
 
 **修改表空间：**
 
@@ -137,7 +140,7 @@ CREATE [TEMPORARY] TABLESPACE tablespace_name TEMPFILE|DATAFILE 'xx.dbf' SIZE xx
 ```sql
 ALTER TABLESPACE tablespace_name ONLINE|OFFLINE;
 
-SELECT status from dba_tablespaces WHERE tablespace_name='systemp';
+SELECT status from dba_tablespaces WHERE tablespace_name='system';
 ```
 
 修改表空间的状态，设置只读或可读写状态（联机状态才能设置）：
@@ -146,7 +149,7 @@ SELECT status from dba_tablespaces WHERE tablespace_name='systemp';
 ALTER TABLESPACE tablespace_name READ ONLY | READ WRITE;
 ```
 
-
+<br/>
 
 **修改表空间数据文件：**
 
@@ -158,7 +161,7 @@ ALTER TABLESPACE tablespace_name ADD DATAFILE 'xx.dbf' SIZE xx;
 ALTER TABLESPACE tablespace_name DROP DATAFILE 'filename.dbf';
 ```
 
-
+<br/>
 
 **删除表空间：**
 
@@ -167,7 +170,7 @@ ALTER TABLESPACE tablespace_name DROP DATAFILE 'filename.dbf';
 DROP TABLESPACE tablespace_name [INCLUDING CONTENTS]
 ```
 
-
+<br/>
 
 ## 四、SQL语言简介
 
@@ -187,17 +190,19 @@ DROP TABLESPACE tablespace_name [INCLUDING CONTENTS]
 
 &emsp;&emsp;6、指针控制语言（CCL）：它的语句，像DECLARE CURSOR，FETCH INTO和UPDATE WHERE CURRENT用于对一个或多个表单独行的操作。
 
+<br/>
 
+## 五、表操作
 
-### 4.1、管理表
+### 5.1、管理表
 
 &emsp;&emsp;约定：每一列数据必须具有相同数据类型，列名必须唯一。并且每一行数据需要唯一（否则会造成数据冗余）。
 
-#### 4.1.1、数据类型
+#### 5.1.1、数据类型
 
 &emsp;&emsp;oracle中主要的数据类型
 
-**1、字符型**
+&emsp;&emsp;**1、字符型**
 
 &emsp;&emsp;固定长度字符类型：
 
@@ -213,7 +218,7 @@ DROP TABLESPACE tablespace_name [INCLUDING CONTENTS]
 
 &emsp;&emsp;VARCHAR(n)：兼容SQL标准
 
-**2、数值型**
+&emsp;&emsp;**2、数值型**
 
 &emsp;&emsp;NUMBER(p, s)：数据的总长度是p位，小数点后占s位。
 
@@ -221,13 +226,13 @@ DROP TABLESPACE tablespace_name [INCLUDING CONTENTS]
 
 &emsp;&emsp;FLOAT(n)：用于存储二进制数据，浮点型。
 
-**3、日期型**
+&emsp;&emsp;**3、日期型**
 
 &emsp;&emsp;DATE：DATE类型表示范围，公元前4712年1月1日到公元9999年12月31日；
 
 &emsp;&emsp;TIMESTAMP：精确到时间秒。
 
-**4、其他数据类型**
+&emsp;&emsp;**4、其他数据类型**
 
 &emsp;&emsp;BLOB：最大4GB字节的数据，存放二进制数据；
 
@@ -235,9 +240,11 @@ DROP TABLESPACE tablespace_name [INCLUDING CONTENTS]
 
 &emsp;&emsp;Oracle的不同数据类型之间的转换，从字符型转换成日期型需要固定的字符格式才能转成功。
 
-![image-20200614215917281](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200614215917281.png)
+![image-20200614215917281](D:\DataBase Program\Oracle\picture\image-20200614215917281.png)
 
-#### 4.1.2、创建表
+<br/>
+
+#### 5.1.2、创建表
 
 ```sql
 CREATE TABLE table_name (
@@ -257,9 +264,9 @@ create table users (
 );
 ```
 
+<br/>
 
-
-#### 4.1.3、修改表的结构
+#### 5.1.3、修改表的结构
 
 添加字段
 
@@ -299,9 +306,9 @@ ALTER TABLE users RENAME COLUMN name TO user_name;
 RENAME table_name TO new_table_name;
 ```
 
+<br/>
 
-
-#### 4.1.4、删除表
+#### 5.1.4、删除表
 
 ```sql
 -- 又称为截断表，删除表中所有的数据，并不删除表结构，比delete语句效率高
@@ -311,11 +318,11 @@ TRUNCATE TABLE table_name;
 DROP TABLE table_name;
 ```
 
+<br/>
 
+### 5.2、操作表中的数据
 
-### 4.2、操作表中的数据
-
-#### **4.2.1、添加数据（INSERT INTO）**
+#### 5.2.1、添加数据（INSERT INTO）
 
 ```sql
 INSERT INTO table_name
@@ -345,9 +352,9 @@ SELECT * FROM default_value;
 ALTER TABLE users MODIFY REMARKS DEFAULT '无';
 ```
 
+<br/>
 
-
-#### **4.2.2、复制表数据**
+#### 5.2.2、复制表数据
 
 在创建表时复制
 
@@ -373,9 +380,9 @@ INSERT INTO user_copy
 SELECT id, user_name, birthday FROM users;
 ```
 
+<br/>
 
-
-#### 4.2.3、修改数据
+#### 5.2.3、修改数据
 
 UPDATE语句
 
@@ -391,9 +398,9 @@ UPDATE user_copy SET birthday = sysdate;
 UPDATE user_copy SET USER_NAME = 'wanglaowu' WHERE id = 1;
 ```
 
+<br/>
 
-
-#### 4.2.4、删除数据
+#### 5.2.4、删除数据
 
 ```sql
 -- 删除表中的所有数据
@@ -404,13 +411,13 @@ DELETE FROM table_name
 [WHERE conditions]
 ```
 
+<br/>
 
-
-### 4.3、约束
+### 5.3、约束
 
 &emsp;&emsp;约束的作用：定义表列中值的规则，确保数据的完整性。
 
-#### 4.3.1、非空约束
+#### 5.3.1、非空约束
 
 在创建表时设置非空约束
 
@@ -434,9 +441,9 @@ ALTER TABLE table_name
 MODIFY column_name datetype NULL;
 ```
 
+<br/>
 
-
-#### 4.3.2、主建约束
+#### 5.3.2、主建约束
 
 &emsp;&emsp;主键的作用：确保表当中每一行数据的唯一性，主键约束（包含了非空约束与唯一约束）。一张只能设计一个主键约束，主键约束可以包含多个列，包含多个列的主键称为联合主键。
 
@@ -460,19 +467,29 @@ SELECT constraint_name FROM user_constraints;
 
 修改表时添加主键约束
 
+<br/>
+
+#### 5.3.3、外键约束
 
 
 
+<br/>
 
-#### 4.3.3、外键约束
-
-
-
-#### 4.3.4、唯一约束
+#### 5.3.4、唯一约束
 
 
 
-#### 4.3.5、检查约束
+<br/>
+
+#### 5.3.5、检查约束
+
+
+
+<br/>
+
+## 六、
+
+
 
 
 
