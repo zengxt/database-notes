@@ -1,0 +1,31 @@
+-- ×Ö·ûº¯Êý
+-- ´óÐ¡Ð´×ª»¯    INITCAP: Ê××ÖÄ¸´óÐ´
+SELECT UPPER('assd'), LOWER('JHHSs'), INITCAP('asdd') FROM dual;  -- ASSD, jhhss, Asdd
+SELECT ename, INITCAP(ename) FROM emp WHERE INITCAP(ename) = 'Smith';
+SELECT * FROM emp WHERE LOWER(ename) = 'smith';
+SELECT * FROM emp WHERE ename = UPPER('smith');
+
+
+-- ×Ó´®
+SELECT SUBSTR('abcde', 2, 3),         -- bcd
+       SUBSTR('abcde', 2),            -- bcde
+       SUBSTR('abcde', -2, 1)         -- d
+FROM DUAL;
+
+SELECT ename, SUBSTR(ename, 2, 2) FROM emp;
+
+
+-- »ñÈ¡×Ö·û´®³¤¶È
+SELECT ename, LENGTH(ename) FROM emp;
+
+
+-- Æ´½Ó×Ö·û´®
+SELECT empno || ename, CONCAT(empno, ename) FROM emp;
+
+
+-- ×Ó´®Ë÷Òý
+select ename, instr(ename, 'A') from emp;
+-- lpad×ó±ß²¹Æë£¬ rpadÓÒ±ß²¹Æë
+select sal, lpad(sal, 10, '*'), rpad(sal, 10, '#') from emp;
+-- Ìæ»»
+select ename, replace(ename, 'A', 'a') from emp;

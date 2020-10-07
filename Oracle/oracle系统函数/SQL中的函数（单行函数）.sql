@@ -8,41 +8,6 @@
 字符函数、数值函数、日期函数、转换函数、其他函数
 */
 
--- 字符函数
-select ename, length(ename) from emp;
-select * from emp where lower(ename) = 'smith';
-select * from emp where ename = upper('smith');
--- 首字母大写
-select ename, initcap(ename) from emp where initcap(ename) = 'Smith';
--- 拼接字符串
-select empno || ename, concat(empno, ename) from emp;
--- 子串
-select ename, substr(ename, 1, 2) from emp;
--- 子串索引
-select ename, instr(ename, 'A') from emp;
--- lpad左边补齐， rpad右边补齐
-select sal, lpad(sal, 10, '*'), rpad(sal, 10, '#') from emp;
--- 替换
-select ename, replace(ename, 'A', 'a') from emp;
-
-
-
--- 数字函数
--- 四舍五入
-select round(45.943, 2) "小数点后两位",
-       round(45.943, 0) "个位",
-       round(45.943, -1) "十位"
-from dual;
--- 截断
-select trunc(45.943, 2) "小数点后两位",
-       trunc(45.943, 0) "个位",
-       trunc(45.943, -1) "十位"
-from dual;
--- 求余
-select ename, sal, MOD(sal, 300) from emp;
-
-
-
 -- 日期函数
 -- sysdate 返回系统当前时间，并且以年月日的形式显示
 select sysdate from dual;
