@@ -2,13 +2,11 @@
 
 &emsp;&emsp;存储在数据库中供所有用户程序调用的子程序叫存储过程或存储函数。
 
-
-
 &emsp;&emsp;存储过程和存储函数的相同点：完成特定功能的程序；
 
 &emsp;&emsp;存储过程和存储函数的区别：是否用RETURN语句返回值，存储函数可以通过return语句返回值。
 
-
+<br/>
 
 ## 一、存储过程
 
@@ -22,7 +20,7 @@ AS
 PLSQL程序体;
 ```
 
-
+<br/>
 
 **第一个存储过程：**
 
@@ -51,7 +49,7 @@ begin
 end;
 ```
 
-
+<br/>
 
 **带参数的存储过程：**
 
@@ -83,7 +81,7 @@ BEGIN
 END;
 ```
 
-
+<br/>
 
 &emsp;&emsp;如何使用PLSQL Developer 调试存储过程，Oracle用户scott用户调试存储过程，需要有Debug的权限，所以登录到sys用户，为scott用户授权：
 
@@ -91,15 +89,13 @@ END;
 grant dba to scott;  -- 也可以就授予Debug的权限
 ```
 
+![image-20201007151004403](../存储过程和函数/picture/image-20201007151004403.png)
 
+![image-20201007151118776](../存储过程和函数/picture/image-20201007151118776.png)
 
-![image-20200531215509638](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200531215509638.png)
+![image-20201007151149432](../存储过程和函数/picture/image-20201007151149432.png)
 
-![image-20200531215535789](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200531215535789.png)
-
-![image-20200531215634996](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200531215634996.png)
-
-
+<br/>
 
 ## 二、存储函数
 
@@ -117,7 +113,7 @@ AS
 PLSQL 子程序;
 ```
 
-
+<br/>
 
 **第一个例子：查询员工的年薪**
 
@@ -165,7 +161,7 @@ BEGIN
 END;
 ```
 
-
+<br/>
 
 &emsp;&emsp;一般来讲，存储过程和存储函数的区别在于存储函数可以有一个返回值；而存储过程没有返回值。
 
@@ -177,7 +173,7 @@ END;
 
 &emsp;&emsp;原则上：如果只有一个返回值，则使用存储函数；否则，就用存储过程。
 
-
+<br/>
 
 **OUT参数的使用**
 
@@ -205,6 +201,183 @@ BEGIN
   queryEmpInform(7839, pname, psal, pjob);
   dbms_output.put_line('pname = ' || pname || ', psal = ' || psal || ', pjob = ' || pjob);
 END;
+```
+
+<br/>
+
+## 三、在应用程序中访问存储过程和存储函数
+
+完整代码地址：https://github.com/zengxt/oracle-base/tree/master
+
+JDBCUtils
+
+```java
+import lombok.extern.slf4j.Slf4j;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+@Slf4j
+public class JDBCUtils {
+    private static String driver = "oracle.jdbc.OracleDriver";
+    private static String url = "jdbc:oracle:thin:@localhost:1521:orcl";
+    private static String user = "scott";
+    private static String password = "admin";
+
+    /**
+     * 注册数据库驱动
+     */
+    static {
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException ex) {
+            log.error("找不到驱动类：{}", ex.getMessage());
+        }
+    }
+
+    /**
+     * 获取数据库连接
+     *
+     * @return Connection
+     */
+    public static Connection getConnection() {
+        try {
+            return DriverManager.getConnection(url, user, password);
+        } catch (SQLException ex) {
+            log.error("获取数据库连接失败：{}", ex.getStackTrace());
+        }
+        return null;
+    }
+
+    /**
+     * 资源释放
+     *
+     * @param conn
+     * @param statement
+     * @param resultSet
+     */
+    public static void release(Connection conn, Statement statement, ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException ex) {
+                log.error("关闭ResultSet失败：{}", ex.getStackTrace());
+            }
+        }
+
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException ex) {
+                log.error("关闭Statement失败：{}", ex.getStackTrace());
+            }
+        }
+
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException ex) {
+                log.error("关闭Connection失败：{}", ex.getStackTrace());
+            }
+        }
+    }
+}
+```
+
+### 1、调用存储过程
+
+```java
+@Test
+public void testCallProcedure() {
+    String sql = "{call queryEmpInform(?, ?, ?, ?)}";
+    Connection conn = null;
+    CallableStatement call = null;
+    try {
+        conn = JDBCUtils.getConnection();
+        call = conn.prepareCall(sql);
+
+        // 对于in参数，需要赋值
+        call.setInt(1, 7839);
+
+        // 对于out参数，声明
+        call.registerOutParameter(2, OracleTypes.VARCHAR);
+        call.registerOutParameter(3, OracleTypes.NUMBER);
+        call.registerOutParameter(4, OracleTypes.VARCHAR);
+
+        // 执行调用
+        call.execute();
+
+        // 取出结果
+        String pname = call.getString(2);
+        double psal = call.getDouble(3);
+        String pjob = call.getString(4);
+        System.out.println("[pname = " + pname + ", psal = " + psal + ", pjob = " + pjob + "]");
+    } catch (Exception ex) {
+        log.error("调用存储过程失败：{}", ex.getStackTrace());
+    } finally {
+        JDBCUtils.release(conn, call, null);
+    }
+}
+```
+
+<br/>
+
+### 2、调用存储函数
+
+```java
+@Test
+public void testCallFunction() {
+    String sql = "{?=call queryEmpIncome(?)}";
+    Connection conn = null;
+    CallableStatement call = null;
+    try {
+        conn = JDBCUtils.getConnection();
+        call = conn.prepareCall(sql);
+
+        // 对于out参数，声明
+        call.registerOutParameter(1, OracleTypes.NUMBER);
+        // 对于in参数，需要赋值
+        call.setInt(2, 7839);
+        // 执行调用
+        call.execute();
+
+        // 取出结果
+        double income = call.getDouble(1);
+        System.out.println("该员工的年收入为：" + income);
+    } catch (Exception ex) {
+        log.error("调用存储函数失败：{}", ex.getStackTrace());
+    } finally {
+        JDBCUtils.release(conn, call, null);
+    }
+}
+```
+
+<br/>
+
+## 四、PACKAGE && PACKAGE BODY
+
+1、包头声明包中的结构
+
+```plsql
+CREATE OR REPLACE PACKAGE mypackage AS
+	type empcursor is ref cursor;
+	procedure queryEmpList(dno in number, empList out empcursor);
+END mypackage;
+```
+
+2、包体定义（需要实现包头中声明的所有方法）
+
+```plsql
+CREATE OR REPLACE PACKAGE BODY mypackage AS
+	PROCEDURE queryEmpList(dno in number, empList out empcursor) AS
+	BEGIN
+		-- 使用光标作为out参数也解决了需要返回多个变量的问题
+		OPEN empList FOR SELECT * FROM emp WHERE deptno = dno;
+	END queryEmpList;
+END mypackage;
 ```
 
 

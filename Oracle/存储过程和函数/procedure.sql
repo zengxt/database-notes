@@ -48,3 +48,29 @@ BEGIN
   COMMIT;
 END;
 
+
+-- out 参数的使用。查询某个员工姓名 月薪和职位
+CREATE OR REPLACE PROCEDURE queryEmpInform(eno IN NUMBER, 
+       pname OUT VARCHAR2, psal OUT NUMBER, pjob OUT VARCHAR2)
+AS
+BEGIN
+  -- 得到员工的姓名，月薪和职位
+  SELECT ename, sal, job INTO pname, psal, pjob FROM emp WHERE empno = eno;
+  
+  -- 如果要返回员工的所有信息呢，总不能写很多个 OUT 参数吧（参数太多）
+  -- 如果要返回一个部门的所有员工的所有信息 ---> 在 OUT 中返回集合？
+END;
+/
+
+SELECT * FROM emp;
+
+DECLARE
+  pname emp.ename%type;
+  psal emp.sal%type;
+  pjob emp.job%type;
+BEGIN
+  queryEmpInform(7839, pname, psal, pjob);
+  dbms_output.put_line('pname = ' || pname || ', psal = ' || psal || ', pjob = ' || pjob);
+END;
+
+
