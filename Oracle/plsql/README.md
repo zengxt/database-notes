@@ -1,14 +1,12 @@
 # PL/SQL（Procedure Language/SQL）
 
-
-
 &emsp;&emsp;PLSQL是Oracle对sql语言的过程化扩展
 
 &emsp;&emsp;指在SQL命令中增加了过程处理语句（如分支、循环等），使SQL语言具有过程处理能力。
 
 &emsp;&emsp;SQL是命令化语言，无法处理复杂的业务逻辑，所以PLSQL对其进行了扩展，使其具有编程语言的能力
 
-
+<br/>
 
 ## 一、PL/SQL的程序结构
 
@@ -50,7 +48,7 @@ BEGIN
 END;
 
 
--- 引用型变量 （原始列的数据类型改变了，定义的变量的类型也会该表）
+-- 引用型变量 （原始列的数据类型改变了，定义的变量的类型也会改变）
 DECLARE
   -- 定义引用型变量：查询并打印7839的姓名和薪水
   pename emp.ename%type;
@@ -72,7 +70,7 @@ BEGIN
 END;
 ```
 
-
+<br/>
 
 ### 2、语句序列
 
@@ -106,7 +104,7 @@ BEGIN
   -- 在PLSQL中接收一个键盘输入
   pnum := '&num';
 
-  -- 在PLSQL中赋值使用 := 使用 = 表示判断是否相等，这一点和其他编程语言不一样需要注意
+  -- 在PLSQL中赋值使用 :=，使用 = 表示判断是否相等，这一点和其他编程语言不一样需要注意
   IF pnum = 0 THEN dbms_output.put_line('您输入的数字是 0');
   ELSIF pnum = 1 THEN dbms_output.put_line('您输入的数字是 1');
   ELSIF pnum = 2 THEN dbms_output.put_line('您输入的数字是 2');
@@ -115,7 +113,7 @@ BEGIN
 END;
 ```
 
-
+<br/>
 
 #### 2）、WHILE循环
 
@@ -140,7 +138,7 @@ BEGIN
 END;
 ```
 
-
+<br/>
 
 #### 3）、LOOP循环
 
@@ -168,7 +166,7 @@ BEGIN
 END;
 ```
 
-
+<br/>
 
 #### 4）、FOR循环
 
@@ -190,7 +188,7 @@ BEGIN
 END;
 ```
 
-
+<br/>
 
 #### 5）、游标
 
@@ -208,7 +206,7 @@ IS SELECT 语句;
 
 &emsp;&emsp;1、打开游标：open c1; (打开游标执行查询)；
 
-&emsp;&emsp;2、从游标中去一条记录：
+&emsp;&emsp;2、从游标中取一条记录：
 
 &emsp;&emsp;fetch c1 into pename; (取一行值到变量中)
 
@@ -242,8 +240,6 @@ END;
 /
 ```
 
-
-
 **游标的属性**
 
 &emsp;&emsp;游标的属性（都以%打头），共有四个
@@ -256,13 +252,11 @@ END;
 
 &emsp;&emsp;4、%ROWCOUNT：影响的行数（注意rowcount是影响的行数，不是总共行数，例如游标中共有100条数据，取走了10条，那么%ROWCOUNT就是10）。
 
-
-
 **游标数目的限制**
 
 &emsp;&emsp;默认情况下，oracle数据库只允许在同一个会话中，打开300个游标
 
-![image-20200607235048070](C:\Users\86187\AppData\Roaming\Typora\typora-user-images\image-20200607235048070.png)
+![image-20200607235048070](../plsql/picture/image-20200607235048070.png)
 
 &emsp;&emsp;修改游标数目的限制：
 
@@ -272,7 +266,7 @@ alter system set open_cursors = 400 scope = both;
 
 &emsp;&emsp;scope的取值，both、memory（只更改当前实例，不更改配置文件）；spfile（只更改配置文件，不更改当前实例，数据库需要重启才起作用）。
 
-
+<br/>
 
 **游标使用的实例**
 
@@ -331,7 +325,7 @@ END;
 /
 ```
 
-
+<br/>
 
 ### 3、例外（异常）处理语句
 
@@ -366,7 +360,7 @@ BEGIN
   SELECT ename INTO pname FROM emp WHERE deptno = 10;
   
   EXCEPTION
-    WHEN TOO_MANY_ROWS THEN dbms_output.put_line('SELECT INTO匹配了多行');
+    WHEN TOO_MANY_ROWS THEN dbms_output.put_line('SELECT INTO 匹配了多行');
     WHEN OTHERS THEN dbms_output.put_line('其他异常！');
 END;
 ```
@@ -435,7 +429,7 @@ BEGIN
 END;
 ```
 
-
+<br/>
 
 ## 二、PL/SQL程序示例
 
@@ -443,8 +437,157 @@ END;
 
 ### 1、统计每年入职的员工人数
 
+```plsql
+-- PLSQL程序示例
+-- 统计每年入职的员工人数
+DECLARE
+  CURSOR cemp IS SELECT TO_CHAR(HIREDATE, 'YYYY') FROM emp;
+  phiredate varchar2(4);
+  count80 number := 0;
+  count81 number := 0;
+  count82 number := 0;
+  count87 number := 0;
+BEGIN
+  OPEN cemp;
+  
+  LOOP
+    -- 取出一个员工的入职年份
+    FETCH cemp into phiredate;
+    EXIT WHEN cemp%NOTFOUND;
+    
+    IF phiredate = '1980' THEN count80 := count80 + 1;
+      ELSIF phiredate = '1981' THEN count81 := count81 + 1;
+      ELSIF phiredate = '1982' THEN count82 := count82 + 1;
+      ELSE count87 := count87 + 1;
+    END IF;
+  END LOOP;
+  
+  CLOSE cemp;
+  
+  -- 打印结果
+  dbms_output.put_line('Total:' || (count80 + count81 + count82 + count87));
+  dbms_output.put_line('1980:' || count80);
+  dbms_output.put_line('1981:' || count81);
+  dbms_output.put_line('1981:' || count82);
+  dbms_output.put_line('1987:' || count87);
+END;
+```
 
+<br/>
 
+### 2、员工涨工资问题
 
+&emsp;&emsp;为员工涨工资，从最低工资涨起每人涨10%，但工资总额不能超过5W元，请计算涨工资的人数和涨工资后的工资总额，并输出涨工资人数和工资总额。
 
-2、
+&emsp;&emsp;注意：从最低工资涨起，需要排序，因为工资总额不能操过5W元，所以先给低工资的涨。
+
+```plsql
+DECLARE
+  CURSOR cemp IS SELECT empno, sal FROM emp order by sal;
+  pempno emp.empno%type;
+  psal emp.sal%type;
+  
+  -- 工资总额
+  pTotalSal number := 0;
+  -- 涨工资人数
+  countEmp number := 0;
+BEGIN
+  -- 工资总额初始化
+  SELECT SUM(SAL) INTO pTotalSal FROM EMP;
+  
+  OPEN cemp;
+  
+  LOOP
+    -- 两个退出条件
+    EXIT WHEN pTotalSal >= 50000;
+    FETCH cemp INTO pempno, psal;
+    EXIT WHEN cemp%NOTFOUND;
+    
+    -- 涨工资
+    IF pTotalSal + psal * 0.1 < 50000 THEN
+      UPDATE emp SET sal = sal * 1.1 WHERE empno = pempno;
+      countEmp := countEmp + 1;
+      pTotalSal := pTotalSal + psal * 0.1;
+    ELSE
+      EXIT;
+    END IF;
+  END LOOP;
+  
+  CLOSE cemp;
+  
+  COMMIT;
+  
+  dbms_output.put_line('涨工资的人数是:' || countEmp || ', 工资的总额是：' || pTotalSal);    
+END;
+```
+
+<br/>
+
+### 3、按部门分工资段统计员工人数
+
+&emsp;&emsp;用PL/SQL语言编写一程序，实现按部门分段（3000元以下，（3000，6000）6000元以上）统计各工资段的职工人数、以及各部门的工资总额（工资总额中不包括奖金）。
+
+```plsql
+-- 按部门分工资段统计员工人数
+CREATE TABLE SAL_MESSAGE(
+  deptno number,
+  low_sal number,
+  mid_sal number,
+  high_sal number,
+  total_sal number
+);
+
+DECLARE
+  -- 部门光标
+  CURSOR cdept IS SELECT deptno FROM dept;
+  pdeptno dept.deptno%type;
+  
+  -- 部门的员工薪水
+  CURSOR cemp(dno number) IS SELECT sal FROM emp WHERE deptno = dno;
+  psal emp.sal%type;
+  
+  -- 每个工资段的员工数
+  countLowSal number;
+  countMidSal number;
+  countHighSal number;
+  
+  -- 每个部门的工资总额
+  totalSal number; 
+BEGIN
+  OPEN cdept;
+  
+  LOOP
+    FETCH cdept INTO pdeptno;
+    EXIT WHEN cdept%NOTFOUND;
+    
+    -- 循环该部门里面的所有员工
+    OPEN cemp(pdeptno);
+    countLowSal := 0;
+    countMidSal := 0;
+    countHighSal := 0;
+    SELECT SUM(SAL) INTO totalSal FROM emp WHERE deptno = pdeptno;
+    LOOP
+      FETCH cemp INTO psal;
+      EXIT WHEN cemp%NOTFOUND;
+      IF psal < 3000 THEN countLowSal := countLowSal + 1;
+        ELSIF psal >= 3000 AND psal < 6000 THEN countMidSal := countMidSal + 1;
+        ELSE countHighSal := countHighSal + 1;
+      END IF;
+    END LOOP;
+    CLOSE cemp;
+    
+    -- 保存当前部门的结果
+    INSERT INTO SAL_MESSAGE VALUES(pdeptno, countLowSal, countMidSal, countHighSal, nvl(totalSal, 0));
+    
+  END LOOP;
+  
+  CLOSE cdept;
+  COMMIT;
+  dbms_output.put_line('统计完成！');
+END;
+/
+
+SELECT * FROM SAL_MESSAGE;
+```
+
+<br/>

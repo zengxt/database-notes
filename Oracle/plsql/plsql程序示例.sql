@@ -240,3 +240,139 @@ BEGIN
 END;
 
 
+-- PLSQL程序示例
+-- 统计每年入职的员工人数
+DECLARE
+  CURSOR cemp IS SELECT TO_CHAR(HIREDATE, 'YYYY') FROM emp;
+  phiredate varchar2(4);
+  count80 number := 0;
+  count81 number := 0;
+  count82 number := 0;
+  count87 number := 0;
+BEGIN
+  OPEN cemp;
+  
+  LOOP
+    -- 取出一个员工的入职年份
+    FETCH cemp into phiredate;
+    EXIT WHEN cemp%NOTFOUND;
+    
+    IF phiredate = '1980' THEN count80 := count80 + 1;
+      ELSIF phiredate = '1981' THEN count81 := count81 + 1;
+      ELSIF phiredate = '1982' THEN count82 := count82 + 1;
+      ELSE count87 := count87 + 1;
+    END IF;
+  END LOOP;
+  
+  CLOSE cemp;
+  
+  -- 打印结果
+  dbms_output.put_line('Total:' || (count80 + count81 + count82 + count87));
+  dbms_output.put_line('1980:' || count80);
+  dbms_output.put_line('1981:' || count81);
+  dbms_output.put_line('1981:' || count82);
+  dbms_output.put_line('1987:' || count87);
+END;
+
+
+-- 给员工涨工资
+DECLARE
+  CURSOR cemp IS SELECT empno, sal FROM emp order by sal;
+  pempno emp.empno%type;
+  psal emp.sal%type;
+  
+  -- 工资总额
+  pTotalSal number := 0;
+  -- 涨工资人数
+  countEmp number := 0;
+BEGIN
+  -- 工资总额初始化
+  SELECT SUM(SAL) INTO pTotalSal FROM EMP;
+  
+  OPEN cemp;
+  
+  LOOP
+    -- 两个退出条件
+    EXIT WHEN pTotalSal >= 50000;
+    FETCH cemp INTO pempno, psal;
+    EXIT WHEN cemp%NOTFOUND;
+    
+    -- 涨工资
+    IF pTotalSal + psal * 0.1 < 50000 THEN
+      UPDATE emp SET sal = sal * 1.1 WHERE empno = pempno;
+      countEmp := countEmp + 1;
+      pTotalSal := pTotalSal + psal * 0.1;
+    ELSE
+      EXIT;
+    END IF;
+  END LOOP;
+  
+  CLOSE cemp;
+  
+  COMMIT;
+  
+  dbms_output.put_line('涨工资的人数是:' || countEmp || ', 工资的总额是：' || pTotalSal);    
+END;
+
+
+-- 按部门分工资段统计员工人数
+CREATE TABLE SAL_MESSAGE(
+  deptno number,
+  low_sal number,
+  mid_sal number,
+  high_sal number,
+  total_sal number
+);
+
+DECLARE
+  -- 部门光标
+  CURSOR cdept IS SELECT deptno FROM dept;
+  pdeptno dept.deptno%type;
+  
+  -- 部门的员工薪水
+  CURSOR cemp(dno number) IS SELECT sal FROM emp WHERE deptno = dno;
+  psal emp.sal%type;
+  
+  -- 每个工资段的员工数
+  countLowSal number;
+  countMidSal number;
+  countHighSal number;
+  
+  -- 每个部门的工资总额
+  totalSal number; 
+BEGIN
+  OPEN cdept;
+  
+  LOOP
+    FETCH cdept INTO pdeptno;
+    EXIT WHEN cdept%NOTFOUND;
+    
+    -- 循环该部门里面的所有员工
+    OPEN cemp(pdeptno);
+    countLowSal := 0;
+    countMidSal := 0;
+    countHighSal := 0;
+    SELECT SUM(SAL) INTO totalSal FROM emp WHERE deptno = pdeptno;
+    LOOP
+      FETCH cemp INTO psal;
+      EXIT WHEN cemp%NOTFOUND;
+      IF psal < 3000 THEN countLowSal := countLowSal + 1;
+        ELSIF psal >= 3000 AND psal < 6000 THEN countMidSal := countMidSal + 1;
+        ELSE countHighSal := countHighSal + 1;
+      END IF;
+    END LOOP;
+    CLOSE cemp;
+    
+    -- 保存当前部门的结果
+    INSERT INTO SAL_MESSAGE VALUES(pdeptno, countLowSal, countMidSal, countHighSal, nvl(totalSal, 0));
+    
+  END LOOP;
+  
+  CLOSE cdept;
+  COMMIT;
+  dbms_output.put_line('统计完成！');
+END;
+/
+
+SELECT * FROM SAL_MESSAGE;
+
