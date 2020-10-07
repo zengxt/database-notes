@@ -380,35 +380,50 @@ CREATE OR REPLACE PACKAGE BODY mypackage AS
 END mypackage;
 ```
 
+<br/>
 
 
 
+## 五、在应用层访问包体中的存储过程（使用了CURSOR类型的OUT参数）
 
+```java
+@Test
+public void testCallProcedure() {
+    String sql = "{call mypackage.queryEmpList(?, ?)}";
+    Connection conn = null;
+    CallableStatement call = null;
+    ResultSet resultSet = null;
+    try {
+        conn = JDBCUtils.getConnection();
+        call = conn.prepareCall(sql);
 
+        // 对于in参数，需要赋值
+        call.setInt(1, 20);
 
+        // 对于out参数，声明
+        call.registerOutParameter(2, OracleTypes.CURSOR);
 
+        // 执行调用
+        call.execute();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        /**
+         * 取出结果
+         * 这里使用的是Oracle的光标，因此需要将CallableStatement接口类型强制装换为Oracle的实现类的类型
+         * 而光标对应在Java程序里面实际上就是结果集，因此：
+         */
+        resultSet = ((OracleCallableStatement) call).getCursor(2);
+        while (resultSet.next()) {
+            int empno = resultSet.getInt("empno");
+            String ename = resultSet.getString("ename");
+            double sal = resultSet.getDouble("sal");
+            String job = resultSet.getString("job");
+            System.out.println("[empno = " + empno + ", ename = " +
+                    ename + ", sal = " + sal + ", job = " + job + "]");
+        }
+    } catch (Exception ex) {
+        log.error("调用存储过程失败：{}", ex.getStackTrace());
+    } finally {
+        JDBCUtils.release(conn, call, null);
+    }
+}
+```
