@@ -20,12 +20,28 @@ SELECT ename, LENGTH(ename) FROM emp;
 
 
 -- 拼接字符串
+SELECT 'ab' || 'cd', CONCAT('ab', 'cd') FROM dual;
 SELECT empno || ename, CONCAT(empno, ename) FROM emp;
 
 
+-- 去除子字符
+SELECT TRIM('a' FROM 'abcd') FROM dual;  -- bcd
+SELECT LTRIM('ababaa', 'a') FROM dual;  -- babaa
+SELECT LTRIM('aaababaa', 'a') FROM dual;  -- babaa
+SELECT RTRIM('ababaa', 'a') FROM dual;  -- abab
+
+
+-- 替换函数
+SELECT REPLACE('abscd', 'a', 'A') FROM dual;  -- Abscd
+SELECT REPLACE('abscd', 'a') FROM dual;  -- bscd
+-- 与trim函数的区别，replace函数可以同时操作多个字符
+SELECT REPLACE('abscd', 'ab', 'A') FROM dual; -- Ascd
+SELECT ename, REPLACE(ename, 'A', 'a') from emp;
+
+
 -- 子串索引
-select ename, instr(ename, 'A') from emp;
+SELECT ename, instr(ename, 'A') from emp;
+
 -- lpad左边补齐， rpad右边补齐
-select sal, lpad(sal, 10, '*'), rpad(sal, 10, '#') from emp;
--- 替换
-select ename, replace(ename, 'A', 'a') from emp;
+SELECT sal, lpad(sal, 10, '*'), rpad(sal, 10, '#') from emp;
+
