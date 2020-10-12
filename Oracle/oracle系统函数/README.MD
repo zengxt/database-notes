@@ -1,3 +1,15 @@
+# Oracle中的系统函数
+
+1、Oracle 中的函数必须有返回值；
+
+2、单行函数：每次取一条记录，作为函数的参数，得到这条记录的单个结果；
+
+3、多行函数（聚合函数）：一次性把多条记录作为函数参数，得到多条记录对应的单个结果
+
+4、Oracle中的数据类型主要分为字符型、数值型和日期型，因此单行函数也主要有：字符函数、数值函数、日期函数、转换函数、其他函数。
+
+<br/>
+
 # 一、数值函数
 
 ## 1、四舍五入
@@ -229,19 +241,82 @@ from dual;
 select ename, hiredate, last_day(hiredate) from emp;
 ```
 
+4、MONTHS_BETWEEN(date1, date2)：表示两个日期之间间隔的月份
 
+```sql
+-- months_between 计算两个日期相差多少个月
+SELECT MONTHS_BETWEEN('13-10月-20', '24-5月-20') FROM dual;  -- 4.64516129032258
+SELECT empno, SYSDATE, hiredate, (SYSDATE - hiredate) / 30, 
+       months_between(SYSDATE, hiredate)
+FROM emp;
 
+-- 日期类型的数据可以使用算术运算符进行计算
+-- 两个日期直接相减，得到相差的天数
+SELECT TO_DATE('13-10月-20') - TO_DATE('24-5月-20') FROM dual; -- 142
+SELECT empno, SYSDATE, Hiredate, round( (SYSDATE - hiredate) / 365, 0 ) FROM emp;
+```
 
+5、EXTRACT(date FROM datetime)：
 
-
-
-
+```sql
+-- 获取日期中指定的时间部分
+SELECT EXTRACT(YEAR FROM SYSDATE) FROM dual; -- 2020
+SELECT EXTRACT(MONTH FROM SYSDATE) FROM dual;
+SELECT EXTRACT(DAY FROM SYSDATE) FROM dual;
+-- 时间戳类型，一样可以获取
+SELECT EXTRACT(HOUR FROM TIMESTAMP '2020-10-13 12:30:30') FROM dual;  -- 12
+```
 
 <br/>
 
 # 四、转换函数
 
+## 1、日期转换成字符
 
+&emsp;&emsp;TO_CHAR(date [, fmt [, params]])：date：将要转换的日期，fmt：转换的格式，params：日期的语言，一般系统会有默认的语言，可省略。
+
+&emsp;&emsp;时间的默认格式：DD-MON-RR（日-月-年）：均是两位，月份还有 '月' 字；
+
+&emsp;&emsp;其他时间格式：
+
+&emsp;&emsp;&emsp;&emsp;年份格式（YY YYYY YEAR，两位、四位与英文）；
+
+&emsp;&emsp;&emsp;&emsp;月份格式（MM MONTH）;
+
+&emsp;&emsp;&emsp;&emsp;日格式（DD DAY）；
+
+&emsp;&emsp;&emsp;&emsp;小时格式（HH24、HH12）；
+
+&emsp;&emsp;&emsp;&emsp;分钟格式（MI）；
+
+&emsp;&emsp;&emsp;&emsp;秒格式（SS）。
+
+```sql
+SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') FROM dual;
+SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD HH12:MI:SS') FROM dual;
+SELECT SYSDATE, to_char( SYSDATE, 'YYYY-MM-DD HH24:MI:SS AM DAY' ) from dual;
+
+-- 查询时间有关条件字段，正常需要这样查找
+SELECT * FROM emp WHERE hiredate = '17-12月-1980';
+-- 使用 to_char 函数
+SELECT * FROM emp WHERE TO_CHAR( hiredate, 'YYYY-MM-DD' ) = '1980-12-17';
+```
+
+<br/>
+
+## 2、字符转换成日期
+
+
+
+<br/>
+
+## 3、数字转换成字符
+
+
+
+<br/>
+
+## 4、字符转换成数字
 
 
 
