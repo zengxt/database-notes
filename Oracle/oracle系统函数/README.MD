@@ -306,21 +306,202 @@ SELECT * FROM emp WHERE TO_CHAR( hiredate, 'YYYY-MM-DD' ) = '1980-12-17';
 
 ## 2、字符转换成日期
 
+TO_DATE(char [, fmt [, params]])：char：将要转换的字符串，fmt：转换的格式，params：日期的语言，一般系统会有默认的语言，可省略。
 
+```sql
+-- to_date, 把字符型数据转成日期
+SELECT TO_DATE('2018-05-22', 'YYYY-MM-DD') FROM dual; -- 2018/5/22，显示的格式可能并不是指定的fmt，可以再次使用TO_CHAR转换成想要显示的格式
+SELECT * FROM emp WHERE hiredate = TO_DATE( '1980-12-17', 'YYYY-MM-DD' );
+```
 
 <br/>
 
 ## 3、数字转换成字符
 
+TO_CHAR(number [, fmt])
 
+9：显示数字并忽略前面的0
+
+0：显示数字，位数不足，用0补齐
+
+.或D：显示小数点
+
+,或G：显示千位符
+
+$：美元符号
+
+S：加正负号（前后都可以）
+
+```sql
+SELECT TO_CHAR(12345.678, '$99,999.999') FROM dual;  --  $12,345.678
+SELECT TO_CHAR(12345.678, '$99,999,999') FROM dual;  --  $12,346
+SELECT TO_CHAR(12345.678, 'S99,999.999') FROM dual;  --  +12,345.678
+-- L：显示本地货币符号
+SELECT sal, TO_CHAR(sal, '$999,999.00'), TO_CHAR(sal, 'L000,000.00') FROM emp;
+```
 
 <br/>
 
 ## 4、字符转换成数字
 
+TO_NUMBER(char [, fmt])：fmt是转换的格式，可以省略。
+
+```sql
+-- to_number, 把字符型数据转成数值, 注意：字符的格式和模板的格式必须要一致
+SELECT to_number('$800.00', '$999,999.00') FROM dual;
+```
+
+<br/>
 
 
 
+# 五、其他函数
+
+## 1、nvl函数
+
+nvl函数将null替换为想要的值（类型需要匹配）
+
+```sql
+SELECT ename, empno, sal, comm, 
+       (sal * 12 + comm) "年收入1", 
+       (sal * 12 + NVL(comm, 0)) "年收入2"
+FROM emp;
+
+SELECT ename, job, NVL(job, '还没有工作') FROM emp;
+```
+
+nvl2 函数当表达式不为 null时，返回表达式1，否则返回表达式2
+
+```sql
+SELECT ename, job, NVL2(job, job, '还没有工作') FROM emp;
+```
+
+<br/>
+
+## 2、NULLIF函数
+
+NULLIF 比较两个表达式，如果相等返回空值，如果不等返回第一个表达式
+
+```sql
+SELECT ename,
+       job,
+       NULLIF(length(ename), length(ename)),
+       NULLIF(length(ename), length(job))
+FROM emp;
+```
+
+<br/>
+
+## 3、case 的用法
+
+```sql
+SELECT ename,
+       job,
+       sal,
+       CASE job
+         WHEN 'CLERK' THEN
+              1.10 * sal
+         WHEN 'MANAGER' THEN
+              1.30 * sal
+         WHEN 'SALESMAN' THEN
+              1.50 * sal
+         ELSE
+              sal
+       END AS "修订工资数"
+FROM emp;
+```
+
+<br/>
+
+## 4、DECODE 关键字
+
+```sql
+-- DECODE 关键字和 CASE 功能一样
+SELECT ename,
+       job,
+       sal,
+       DECODE(job,
+              'CLERK',
+              1.10 * sal,
+              'MANAGER',
+              1.30 * sal,
+              'SALESMAN',
+              1.50 * sal,
+              sal) AS "修订工资数"
+FROM emp;
+```
+
+<br/>
 
 
 
+# 六、聚合函数
+
+```sql
+-- 聚合函数：多行函数
+-- 多行输入，一个输出
+
+-- AVG 和 SUM 只能用于数值型的数据
+-- MAX、MIN、COUNT 可以针对任何类型的数据
+SELECT MAX(sal), MIN(sal), AVG(sal), SUM(sal) FROM emp;
+SELECT MAX(ename), MIN(ename) FROM emp;
+SELECT MAX(hiredate), MIN(hiredate) FROM emp;
+
+
+-- COUNT 有两种用法
+-- COUNT(*) 查询数据的总条数
+SELECT COUNT(*) FROM emp;
+-- COUNT(字段) 会忽略空值
+SELECT COUNT(comm) FROM emp;
+
+
+-- 所有的聚合函数都是忽略空值的
+SELECT SUM(comm), AVG(comm), COUNT(comm), SUM(comm) / COUNT(comm) FROM emp;
+
+
+-- 按照人数计算平均奖金
+SELECT SUM(comm) / COUNT(*),
+       AVG(comm) /*实际上等价于  SUM(comm) / COUNT(comm) */,
+       AVG(NVL(comm, 0))
+FROM emp;
+
+
+-- 建立数据的分组
+-- 出现在查询列表中的字段，要么出现在聚合函数中，要么出现在 GROUP BY子句中
+SELECT deptno, MAX(sal) FROM emp GROUP BY deptno;
+
+
+-- 按照多个字段进行分组
+SELECT deptno, job, MAX(sal) 
+FROM emp 
+GROUP BY deptno, job
+ORDER BY deptno;
+
+
+-- 对分组后的数据进行过滤
+-- WHERE 子句中不能使用分聚合函数， 需要理解 WHERE子句中筛选出来的数据是作为分聚合函数的输入的
+-- 如果需要对分组后的数据过滤，使用 HAVING 子句，
+-- 可以理解为 WHERE 是分组前过滤， HAVING 是分组后过滤， 能写在 WHERE 子句中的条件尽量写在 WHERE子句中
+SELECT deptno, MAX(sal)
+FROM emp
+GROUP BY deptno
+HAVING MAX(sal) >= 3000
+ORDER BY deptno;
+
+SELECT deptno, MAX(sal)
+FROM emp
+WHERE deptno IS NOT NULL
+GROUP BY deptno
+HAVING MAX(sal) >= 3000
+ORDER BY deptno;
+
+
+-- 聚合函数也可以嵌套
+-- 在聚合函数嵌套的时候，必须要使用GROUP BY 
+--（因为只用使用了GROUP BY，结果集才为多条记录，才又能作为聚合函数的输入）
+-- 聚合函数最多嵌套两次
+SELECT MAX (MAX(sal))
+FROM emp
+WHERE deptno IS NOT NULL
+GROUP BY deptno;
+```
