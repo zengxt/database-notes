@@ -136,12 +136,55 @@ SELECT columnName + 固定值 FROM tableName;
 SELECT columnName1 + columnName2 FROM tableName; -- 参与运算的必须是数值类型
 ```
 
-**条件查询：**
+**聚合函数：**
+
+count：统计指定列记录数，记录为NULL的不统计；
+
+sum：计算指定列的数值和，如果不是数值类型，那么计算结果为0；
+
+max：计算指定列的最大值；
+
+min：计算指定列的最小值；
+
+avg：计算指定列的平均值，如果不是数值类型，那么计算结果为0。
+
+**分组查询：**
 
 ```mysql
+-- 分组查询是指使用GROUP BY语句对查询信息进行分组，相同数据作为一组
+SELECT columnName1, columnName2... FROM tableName GROUP BY columnName [HAVING condition]
 
+-- WHERE 是分组前过滤，HAVING是分组后过滤，所以聚合函数只能使用在HAVING子句中，而不能用在WHERE子句
+SELECT sex, COUNT(*) FROM hero WHERE age < 30 GROUP BY sex HAVING COUNT(*) > 2;
 ```
 
+**LIMIT分页：**
 
+```mysql
+SELECT *|字段列表 [AS 别名] FROM 表名 [WHERE 子句] [GROUP BY子句] [HAVING 子句] [ORDER BY 子句] [LIMIT 子句]
+-- limit 子句为什么排在最后，因为前面的限制条件都处理完了，才能处理显示多少条记录的问题
+
+LIMIT语法格式
+LIMIT offset , length; 或者 LIMIT length;
+offset 是指偏移量，可以认为是跳过的记录数量，默认为0
+length 是指需要显示的总记录数
+
+-- 分页
+SELECT * FROM hero LIMIT 0, 5;
+SELECT * FROM hero LIMIT 5, 5;
+SELECT * FROM hero LIMIT 10, 5;
+```
+
+<br/>
+
+## 四、数据库约束
+
+主键自增：AUTO_INCREMENT
+
+>DELETE 删除表中的数据，但不重置AUTO_INCREMENT的值
+>
+>TRUNCATE摧毁表，重建表，AUTO_INCREMENT重置为1。
+
+唯一约束：可以插入多个NULL，因为NULL表示没有值，所以不存在唯不唯一的问题
 
 <br/>
