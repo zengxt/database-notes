@@ -582,7 +582,61 @@ ALTER TABLE table_name DROP CONSTRAINT constraint_name;
 
 <br/>
 
-## 六、
+## 六、Oracle伪列
+
+&emsp;&emsp;1、Oracle为数据中的表都提供有伪列，伪列就像表的一个列，但是它并没有存储在表中；
+
+&emsp;&emsp;2、伪列可以从表中查询，但不能插入、更新和删除它们的值；
+
+&emsp;&emsp;3、常用的伪列有ROWID和ROWNUM。
+
+### 6.1、ROWID
+
+&emsp;&emsp;ROWID是表中每一条记录的唯一标识符，数据库内部使用它来存储行的地址，该地址可以唯一标识数据库中的一行，可以使用ROWID伪列快速地定位表中的某一行。
+
+```sql
+create table test_table (id number(10), name varchar2(30));
+insert into test_table values(1, 'zhangsan');
+insert into test_table values(2, 'lisi');
+insert into test_table values(3, 'wanglaowu');
+
+select rowid, rownum from test_table;
+
+-- 如果rowid后面跟的是 * ，必须为表取别名，如果是具体的列名，不需要别名
+select rowid, t.* from test_table t;
+SELECT rowid, name from test_table;
+
+insert into test_table values(3, 'wanglaowu');
+insert into test_table values(3, 'wanglaowu');
+
+select rowid, t.* from test_table t;
+-- 当表中有重复行时，可以使用rowid来删除
+delete from test_table where rowid = 'AAAStFAAEAAAAJkAAE';
+```
+
+<br/>
+
+### 6.2、ROWNUM
+
+&emsp;&emsp;ROWNUM是SQL查询返回的结果集中每一行的行号，ROWNUM是先查到结果集之后再加上去的一个列，可以用它来限制查询返回的行数。
+
+&emsp;&emsp;1、ROWNUM是一个序列，是Oracle数据库从数据文件或缓冲区中读取数据的顺序。它读取第一条记录则ROWNUM值为1，第二条为2，依次类推。
+
+&emsp;&emsp;2、如果条件语句的 >, >=, =, BETWEEN AND 中使用了ROWNUM，是取不到数据的。因为从缓冲区或者数据文件中得到的第一条记录的ROWNUM为1，不符合WHERE条件，则被删除；接着取下条，但它的ROWNUM还是1，又被删除，依次类推，便没有了数据。
+
+```sql
+select rownum, t.* from test_table t;
+-- rownum 可以用在 <, <= 条件中
+select * from test_table where rownum <=2;
+
+-- 一般会使用一个子查询来得到全表的rownum号，然后再此基础上再进行一些操作
+select id, name from (select rownum num, t.* from test_table t)
+where num > 2;
+
+-- ORACLE 一般使用ROWNUM来实现分页
+select id, name from (select rownum num, t.* from test_table t)
+where num between 1 and 3;
+```
 
 
 
