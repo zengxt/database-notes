@@ -188,3 +188,4 @@ SELECT * FROM hero LIMIT 10, 5;
 唯一约束：可以插入多个NULL，因为NULL表示没有值，所以不存在唯不唯一的问题
 
 <br/>
+
